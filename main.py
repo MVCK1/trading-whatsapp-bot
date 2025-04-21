@@ -4,6 +4,10 @@ import os
 
 app = Flask(__name__)
 
+@app.route('/')
+def home():
+    return 'Bot de trading activo 😎'
+
 @app.route('/webhook', methods=['POST'])
 def webhook():
     data = request.json
