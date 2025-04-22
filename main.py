@@ -10,8 +10,10 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 
 # ======== Configuración de colores para velas ========
+market_colors = mpf.make_marketcolors(up=COLOR_SUBIDA, down=COLOR_BAJADA)
 custom_style = mpf.make_mpf_style(
     base_mpf_style='nightclouds',
+    marketcolors=market_colors,
     facecolor='black',
     edgecolor='white',
     figcolor='black',
