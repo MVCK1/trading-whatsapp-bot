@@ -50,22 +50,20 @@ def obtener_precios(moneda):
 
 # ======== Función para generar gráfico y guardarlo ========
 def crear_grafico(df, moneda):
-    if not os.path.exists("static"):
-        os.makedirs("static")
     nombre = f"{moneda.upper()}_grafico.png"
-    ruta = os.path.join("static", nombre)
-    mpf.plot(df, type='candle', style=custom_style,
+    mpf.plot(df, type='candle',
+             style=custom_style,
              title=f"{moneda.upper()} - Velas 4h",
              ylabel='Precio (USDT)',
-             savefig=dict(fname=ruta, dpi=100, bbox_inches='tight'),
+             savefig=dict(fname=nombre, dpi=100, bbox_inches='tight'),
              mav=(3, 5),
              tight_layout=True,
-             figratio=(12,6),
+             figratio=(12, 6),
              volume=False,
              datetime_format='%b %d %Hh',
              warn_too_much_data=10000,
              update_width_config=dict(candle_linewidth=1.0),
-             colorup=COLOR_SUBIDA, colordown=COLOR_BAJADA)
+             **mpf.make_marketcolors(up=COLOR_SUBIDA, down=COLOR_BAJADA).get_mpfstyle()._get_kwdict())
     return nombre
 
 # ======== Análisis simple de tendencia ========
