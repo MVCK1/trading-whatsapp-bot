@@ -1,3 +1,6 @@
 flask
 twilio
+requests
+pandas
+matplotlib
 mplfinance
