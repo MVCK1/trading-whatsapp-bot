@@ -50,11 +50,14 @@ def obtener_precios(moneda):
 
 # ======== Función para generar gráfico y guardarlo ========
 def crear_grafico(df, moneda):
+    if not os.path.exists("static"):
+        os.makedirs("static")
     nombre = f"{moneda.upper()}_grafico.png"
+    ruta = os.path.join("static", nombre)
     mpf.plot(df, type='candle', style=custom_style,
              title=f"{moneda.upper()} - Velas 4h",
              ylabel='Precio (USDT)',
-             savefig=dict(fname=nombre, dpi=100, bbox_inches='tight'),
+             savefig=dict(fname=ruta, dpi=100, bbox_inches='tight'),
              mav=(3, 5),
              tight_layout=True,
              figratio=(12,6),
@@ -94,7 +97,7 @@ def webhook():
             precio_actual = df['close'].iloc[-1]
             mensaje = f"💰 {encontrada.upper()}: ${precio_actual:.2f} USD\n\n{consejo}"
             msg.body(mensaje)
-            msg.media(f"https://tu-url-en-render.com/static/{nombre}")  # Reemplaza si usas carpeta /static
+            msg.media(f"https://trading-bot-x624.onrender.com/static/{nombre}")  # Reemplaza si usas carpeta /static
         else:
             msg.body("No pude obtener los datos en este momento.")
     else:
