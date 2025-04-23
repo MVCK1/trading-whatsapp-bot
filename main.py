@@ -100,20 +100,20 @@ def webhook():
     encontrada = next((m for m in monedas if m in incoming_msg), None)
 
     if encontrada:
-    df = obtener_precios(encontrada)
-    
-    if df is None or df.empty or 'close' not in df.columns or df['close'].empty:
-        msg.body("⚠️ No se pudo obtener el precio actual de esa criptomoneda. Intenta más tarde.")
-    else:
-        print("HEADERS:", df.columns)
-        print("DATAFRAME LENGTH:", len(df))
-        print(df.head())
-        nombre = crear_grafico(df, encontrada)
-        consejo = sugerencia(df)
-        precio_actual = df['close'].iloc[-1]
-        mensaje = f"💰 {encontrada.upper()}: ${precio_actual:.2f} USD\n\n{consejo}"
-        msg.body(mensaje)
-        msg.media(f"https://trading-bot-x624.onrender.com/static/{nombre}")
+        df = obtener_precios(encontrada)
+
+        if df is None or df.empty or 'close' not in df.columns or df['close'].empty:
+            msg.body("⚠️ No se pudo obtener el precio actual de esa criptomoneda. Intenta más tarde.")
+        else:
+            print("HEADERS:", df.columns)
+            print("DATAFRAME LENGTH:", len(df))
+            print(df.head())
+            nombre = crear_grafico(df, encontrada)
+            consejo = sugerencia(df)
+            precio_actual = df['close'].iloc[-1]
+            mensaje = f"💰 {encontrada.upper()}: ${precio_actual:.2f} USD\n\n{consejo}"
+            msg.body(mensaje)
+            msg.media(f"https://trading-bot-x624.onrender.com/static/{nombre}")
     else:
         msg.body("Hola 👋 Pregúntame por BTC, ETH, USDT o TrumpCoin y te mostraré precio + gráfica 📊")
 
