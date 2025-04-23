@@ -10,6 +10,9 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 
 # ======== Configuración de colores para velas ========
+COLOR_SUBIDA = 'blue'
+COLOR_BAJADA = 'red'
+
 market_colors = mpf.make_marketcolors(up=COLOR_SUBIDA, down=COLOR_BAJADA)
 custom_style = mpf.make_mpf_style(
     base_mpf_style='nightclouds',
@@ -19,9 +22,6 @@ custom_style = mpf.make_mpf_style(
     figcolor='black',
     gridcolor='gray'
 )
-
-COLOR_SUBIDA = 'blue'
-COLOR_BAJADA = 'red'
 
 # ======== Función para obtener precios de Binance ========
 def obtener_precios(moneda):
