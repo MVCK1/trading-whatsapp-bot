@@ -51,9 +51,14 @@ def obtener_precios(moneda):
     return df[['open', 'high', 'low', 'close']]
 
 # ======== Función para generar gráfico y guardarlo ========
+print("HEADERS:", df.columns)
+print("DATAFRAME LENGTH:", len(df))
+print(df.head())
+
 def crear_grafico(df, moneda):
-    nombre = f"{moneda.upper()}_grafico.png"
-    df.index.name = 'Date'
+    if df.empty:
+        print("⚠️ DataFrame vacío. No se puede generar el gráfico.")
+        return None
 
     df.rename(columns={
         'Open': 'open',
