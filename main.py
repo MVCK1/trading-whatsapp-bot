@@ -66,6 +66,9 @@ def obtener_precios(moneda):
 
 # ======== Función para generar gráfico y guardarlo ========
 def crear_grafico(df, moneda):
+    # Crear carpeta 'static' si no existe
+    if not os.path.exists("static"):
+        os.makedirs("static")
     if df.empty:
         print("⚠️ DataFrame vacío. No se puede generar gráfico.")
         return None
@@ -85,7 +88,6 @@ def crear_grafico(df, moneda):
              warn_too_much_data=10000,
              update_width_config=dict(candle_linewidth=1.0))
     return nombre
-
 # ======== Análisis simple de tendencia ========
 def sugerencia(df):
     if df.empty or len(df['close']) < 5:
