@@ -33,29 +33,43 @@ def obtener_precios(moneda):
     }
     simbolo = simbolos.get(moneda.lower())
     if not simbolo:
+        print("❌ Símbolo no reconocido:", moneda)
         return None
 
     url = f"https://api.binance.com/api/v3/klines?symbol={simbolo}&interval=4h&limit=30"
     respuesta = requests.get(url)
 
     print("STATUS:", respuesta.status_code)
-    print("RESPUESTA:", respuesta.text)
+    print("RESPUESTA:", respuesta.text[:500])  # Limita la respuesta por si es muy larga
 
-    datos = respuesta.json()
+    try:
+        datos = respuesta.json()
+    except Exception as e:
+        print("❌ Error al convertir a JSON:", e)
+        return None
 
-    df = pd.DataFrame(datos, columns=[
-        'timestamp', 'open', 'high', 'low', 'close', 'volume',
-        'close_time', 'quote_asset_volume', 'trades', 'taker_buy_base',
-        'taker_buy_quote', 'ignore'
-    ])
-    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-    df.set_index('timestamp', inplace=True)
-    df = df.astype(float)
+    if not datos:
+        print("❌ Binance regresó lista vacía")
+        return None
 
-    print("DF PREVIO AL RETURN:")
-    print(df.head())
+    try:
+        df = pd.DataFrame(datos, columns=[
+            'timestamp', 'open', 'high', 'low', 'close', 'volume',
+            'close_time', 'quote_asset_volume', 'trades', 'taker_buy_base',
+            'taker_buy_quote', 'ignore'
+        ])
+        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+        df.set_index('timestamp', inplace=True)
+        df = df.astype(float)
 
-    return df[['open', 'high', 'low', 'close']]
+        print("✅ DataFrame creado:")
+        print(df.head())
+
+        return df[['open', 'high', 'low', 'close']]
+
+    except Exception as e:
+        print("❌ Error al procesar el DataFrame:", e)
+        return None
 
 # ======== Función para generar gráfico y guardarlo ========
 def crear_grafico(df, moneda):
