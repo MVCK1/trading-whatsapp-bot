@@ -38,7 +38,7 @@ def obtener_precios(moneda):
         print("❌ Moneda no válida")
         return None
 
-    url = f"https://api.coingecko.com/api/v3/coins/{id_moneda}/market_chart?vs_currency=usd&days=5&interval=hourly"
+    url = f"https://api.coingecko.com/api/v3/coins/{id_moneda}/market_chart?vs_currency=usd&days=5"
     respuesta = requests.get(url)
 
     print("STATUS:", respuesta.status_code)
