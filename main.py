@@ -37,6 +37,10 @@ def obtener_precios(moneda):
 
     url = f"https://api.binance.com/api/v3/klines?symbol={simbolo}&interval=4h&limit=30"
     respuesta = requests.get(url)
+
+    print("STATUS:", respuesta.status_code)
+    print("RESPUESTA:", respuesta.text)
+
     datos = respuesta.json()
 
     df = pd.DataFrame(datos, columns=[
@@ -47,6 +51,9 @@ def obtener_precios(moneda):
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     df.set_index('timestamp', inplace=True)
     df = df.astype(float)
+
+    print("DF PREVIO AL RETURN:")
+    print(df.head())
 
     return df[['open', 'high', 'low', 'close']]
 
