@@ -60,16 +60,14 @@ def crear_grafico(df, moneda):
         'High': 'high',
         'Low': 'low',
         'Close': 'close',
-        'Volume': 'volume'
-    }, inplace=True)
+        }, inplace=True)
 
     mpf.plot(df,
              type='candle',
              style=custom_style,
              title=moneda.upper(),
              ylabel='Precio (USD)',
-             ylabel_lower='Volumen',
-             volume=True,
+             volume=False,  # 👈 aquí apagamos el volumen
              savefig=dict(fname=nombre, dpi=100, bbox_inches='tight'),
              mav=(3, 5),
              tight_layout=True,
