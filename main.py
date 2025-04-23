@@ -55,6 +55,14 @@ def crear_grafico(df, moneda):
     nombre = f"{moneda.upper()}_grafico.png"
     df.index.name = 'Date'
 
+    df.rename(columns={
+        'Open': 'open',
+        'High': 'high',
+        'Low': 'low',
+        'Close': 'close',
+        'Volume': 'volume'
+    }, inplace=True)
+
     mpf.plot(df,
              type='candle',
              style=custom_style,
@@ -71,6 +79,7 @@ def crear_grafico(df, moneda):
              update_width_config=dict(candle_linewidth=1.0))
 
     return nombre
+
 # ======== Análisis simple de tendencia ========
 def sugerencia(df):
     ultimos = df['close'].iloc[-5:]
