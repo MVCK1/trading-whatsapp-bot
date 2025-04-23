@@ -56,9 +56,8 @@ print("DATAFRAME LENGTH:", len(df))
 print(df.head())
 
 def crear_grafico(df, moneda):
-    if df.empty:
-        print("⚠️ DataFrame vacío. No se puede generar el gráfico.")
-        return None
+    nombre = f"{moneda.upper()}_grafico.png"
+    df.index.name = 'Date'
 
     df.rename(columns={
         'Open': 'open',
