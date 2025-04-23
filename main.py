@@ -1,3 +1,4 @@
+import sys
 from flask import Flask, request
 from twilio.twiml.messaging_response import MessagingResponse
 import requests
@@ -34,22 +35,26 @@ def obtener_precios(moneda):
     simbolo = simbolos.get(moneda.lower())
     if not simbolo:
         print("❌ Símbolo no reconocido:", moneda)
-        return None
+        sys.stdout.flush()
+        return None 
 
     url = f"https://api.binance.com/api/v3/klines?symbol={simbolo}&interval=4h&limit=30"
     respuesta = requests.get(url)
 
     print("STATUS:", respuesta.status_code)
-    print("RESPUESTA:", respuesta.text[:500])  # Limita la respuesta por si es muy larga
+    print("RESPUESTA:", respuesta.text[:500])
+    sys.stdout.flush()
 
     try:
         datos = respuesta.json()
     except Exception as e:
         print("❌ Error al convertir a JSON:", e)
+        sys.stdout.flush()
         return None
 
     if not datos:
         print("❌ Binance regresó lista vacía")
+        sys.stdout.flush()
         return None
 
     try:
@@ -64,17 +69,20 @@ def obtener_precios(moneda):
 
         print("✅ DataFrame creado:")
         print(df.head())
+        sys.stdout.flush()
 
         return df[['open', 'high', 'low', 'close']]
 
     except Exception as e:
         print("❌ Error al procesar el DataFrame:", e)
+        sys.stdout.flush()
         return None
 
 # ======== Función para generar gráfico y guardarlo ========
 def crear_grafico(df, moneda):
     if df.empty:
         print("⚠️ DataFrame vacío. No se puede generar gráfico.")
+        sys.stdout.flush()
         return None
 
     nombre = f"{moneda.upper()}_grafico.png"
@@ -86,7 +94,7 @@ def crear_grafico(df, moneda):
              title=moneda.upper(),
              ylabel='Precio (USD)',
              volume=False,
-             savefig=dict(fname=nombre, dpi=100, bbox_inches='tight'),
+             savefig=dict(fname=f"static/{nombre}", dpi=100, bbox_inches='tight'),
              mav=(3, 5),
              tight_layout=True,
              figratio=(12, 6),
@@ -113,6 +121,7 @@ def webhook():
     incoming_msg = request.form.get('Body', '').lower()
     remitente = request.form.get('From', '')
     print(f"Mensaje de {remitente}: {incoming_msg}")
+    sys.stdout.flush()
 
     response = MessagingResponse()
     msg = response.message()
@@ -129,6 +138,8 @@ def webhook():
             print("HEADERS:", df.columns)
             print("DATAFRAME LENGTH:", len(df))
             print(df.head())
+            sys.stdout.flush()
+
             nombre = crear_grafico(df, encontrada)
             consejo = sugerencia(df)
             precio_actual = df['close'].iloc[-1]
@@ -141,4 +152,4 @@ def webhook():
     return str(response)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 10000)), use_reloader=False)
