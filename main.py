@@ -102,8 +102,7 @@ def webhook():
             print("HEADERS:", df.columns)
             print("DATAFRAME LENGTH:", len(df))
             print(df.head())
-
-	    nombre = crear_grafico(df, encontrada)
+            nombre = crear_grafico(df, encontrada)
             consejo = sugerencia(df)
             precio_actual = df['close'].iloc[-1]
             mensaje = f"💰 {encontrada.upper()}: ${precio_actual:.2f} USD\n\n{consejo}"
