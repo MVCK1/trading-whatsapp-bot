@@ -53,21 +53,24 @@ def obtener_precios(moneda):
 # ======== Función para generar gráfico y guardarlo ========
 def crear_grafico(df, moneda):
     nombre = f"{moneda.upper()}_grafico.png"
-    mpf.plot(df, type='candle',
+    df.index.name = 'Date'
+
+    mpf.plot(df,
+             type='candle',
              style=custom_style,
-             title=f"{moneda.upper()} - Velas 4h",
-             ylabel='Precio (USDT)',
+             title=moneda.upper(),
+             ylabel='Precio (USD)',
+             ylabel_lower='Volumen',
+             volume=True,
              savefig=dict(fname=nombre, dpi=100, bbox_inches='tight'),
              mav=(3, 5),
              tight_layout=True,
              figratio=(12, 6),
-             volume=False,
              datetime_format='%b %d %Hh',
              warn_too_much_data=10000,
-             update_width_config=dict(candle_linewidth=1.0),
-             **mpf.make_marketcolors(up=COLOR_SUBIDA, down=COLOR_BAJADA).get_mpfstyle()._get_kwdict())
-    return nombre
+             update_width_config=dict(candle_linewidth=1.0))
 
+    return nombre
 # ======== Análisis simple de tendencia ========
 def sugerencia(df):
     ultimos = df['close'].iloc[-5:]
