@@ -51,27 +51,20 @@ def obtener_precios(moneda):
     return df[['open', 'high', 'low', 'close']]
 
 # ======== Función para generar gráfico y guardarlo ========
-print("HEADERS:", df.columns)
-print("DATAFRAME LENGTH:", len(df))
-print(df.head())
-
 def crear_grafico(df, moneda):
+    if df.empty:
+        print("⚠️ DataFrame vacío. No se puede generar gráfico.")
+        return None
+
     nombre = f"{moneda.upper()}_grafico.png"
     df.index.name = 'Date'
-
-    df.rename(columns={
-        'Open': 'open',
-        'High': 'high',
-        'Low': 'low',
-        'Close': 'close',
-        }, inplace=True)
 
     mpf.plot(df,
              type='candle',
              style=custom_style,
              title=moneda.upper(),
              ylabel='Precio (USD)',
-             volume=False,  # 👈 aquí apagamos el volumen
+             volume=False,
              savefig=dict(fname=nombre, dpi=100, bbox_inches='tight'),
              mav=(3, 5),
              tight_layout=True,
@@ -106,7 +99,11 @@ def webhook():
     if encontrada:
         df = obtener_precios(encontrada)
         if df is not None:
-            nombre = crear_grafico(df, encontrada)
+            print("HEADERS:", df.columns)
+            print("DATAFRAME LENGTH:", len(df))
+            print(df.head())
+
+	    nombre = crear_grafico(df, encontrada)
             consejo = sugerencia(df)
             precio_actual = df['close'].iloc[-1]
             mensaje = f"💰 {encontrada.upper()}: ${precio_actual:.2f} USD\n\n{consejo}"
