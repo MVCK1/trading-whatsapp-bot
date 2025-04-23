@@ -77,6 +77,9 @@ def crear_grafico(df, moneda):
 
 # ======== Análisis simple de tendencia ========
 def sugerencia(df):
+    if df.empty or len(df['close']) < 5:
+        return "⚠️ No hay suficientes datos para dar una sugerencia en este momento."
+
     ultimos = df['close'].iloc[-5:]
     if ultimos[-1] > ultimos.mean():
         return "📈 La tendencia parece alcista. Podría ser buen momento para comprar."
