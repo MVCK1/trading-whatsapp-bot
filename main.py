@@ -8,11 +8,17 @@ import os
 import pandas as pd
 import mplfinance as mpf
 
+# === NUEVO ===
+import threading
+import schedule
+import time
+from twilio.rest import Client
+
 app = Flask(__name__, static_folder='static')
 
 # ======== Configuración de colores para velas ========
-COLOR_SUBIDA = 'blue'
-COLOR_BAJADA = 'red'
+COLOR_SUBIDA = 'dark blue'
+COLOR_BAJADA = 'dark red'
 
 market_colors = mpf.make_marketcolors(up=COLOR_SUBIDA, down=COLOR_BAJADA)
 custom_style = mpf.make_mpf_style(
@@ -21,7 +27,7 @@ custom_style = mpf.make_mpf_style(
     facecolor='black',
     edgecolor='white',
     figcolor='black',
-    gridcolor='gray'
+    gridcolor='dark gray'
 )
 
 # ======== NUEVA FUNCIÓN: CoinGecko en lugar de Binance ========
@@ -30,7 +36,6 @@ def obtener_precios(moneda):
         'btc': 'bitcoin',
         'eth': 'ethereum',
         'usdt': 'tether'
-        # 'trumpcoin': 'trumpcoin'  # No disponible en CoinGecko
     }
 
     id_moneda = simbolos.get(moneda.lower())
@@ -66,7 +71,6 @@ def obtener_precios(moneda):
 
 # ======== Función para generar gráfico y guardarlo ========
 def crear_grafico(df, moneda):
-    # Crear carpeta 'static' si no existe
     if not os.path.exists("static"):
         os.makedirs("static")
     if df.empty:
@@ -88,15 +92,81 @@ def crear_grafico(df, moneda):
              warn_too_much_data=10000,
              update_width_config=dict(candle_linewidth=1.0))
     return nombre
+
 # ======== Análisis simple de tendencia ========
 def sugerencia(df):
     if df.empty or len(df['close']) < 5:
         return "⚠️ No hay suficientes datos para dar una sugerencia en este momento."
+
     ultimos = df['close'].iloc[-5:]
-    if ultimos[-1] > ultimos.mean():
-        return "📈 La tendencia parece alcista. Podría ser buen momento para comprar."
+    promedio = ultimos.mean()
+    actual = ultimos.iloc[-1]
+
+    explicacion = []
+
+    if actual > promedio:
+        explicacion.append("✅ El precio está por encima del promedio de los últimos días.")
     else:
-        return "📉 La tendencia parece bajista. Tal vez sea mejor esperar para comprar."
+        explicacion.append("⚠️ El precio está por debajo del promedio reciente.")
+
+    if actual > ultimos.iloc[-2] > ultimos.iloc[-3]:
+        explicacion.append("📈 Hay una secuencia de cierres ascendentes, indicando fuerza compradora.")
+    elif actual < ultimos.iloc[-2] < ultimos.iloc[-3]:
+        explicacion.append("📉 Hay una secuencia de cierres descendentes, lo que podría ser una tendencia bajista.")
+
+    if abs(actual - promedio) / promedio > 0.03:
+        explicacion.append("🔍 El precio se ha separado bastante del promedio, lo cual puede indicar un cambio fuerte.")
+
+    if actual > promedio:
+        decision = "📈 La tendencia parece alcista. Podría ser buen momento para comprar."
+    else:
+        decision = "📉 La tendencia parece bajista. Tal vez sea mejor esperar para comprar."
+
+    return "\n".join(explicacion) + "\n\n" + decision
+
+# ======== NUEVO: Enviar WhatsApp automáticamente ========
+def enviar_whatsapp(numero, mensaje, imagen_url=None):
+    account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
+    auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
+    twilio_whatsapp = os.environ.get("TWILIO_WHATSAPP_NUMBER")
+
+    client = Client(account_sid, auth_token)
+
+    message = client.messages.create(
+        body=mensaje,
+        from_=f'whatsapp:{twilio_whatsapp}',
+        to=f'whatsapp:{numero}',
+        media_url=[imagen_url] if imagen_url else None
+    )
+
+    print("📬 Mensaje automático enviado:", message.sid)
+
+# ======== NUEVO: Tarea periódica cada 4h ========
+def tarea_periodica():
+    monedas = ['btc', 'eth', 'usdt']
+    para_numero = os.environ.get("USUARIO_NUMERO")
+
+    for moneda in monedas:
+        df = obtener_precios(moneda)
+        if df is not None and not df.empty:
+            nombre = crear_grafico(df, moneda)
+            consejo = sugerencia(df)
+            precio_actual = df['close'].iloc[-1]
+            mensaje = f"🔔 Alerta automática\n\n💰 {moneda.upper()}: ${precio_actual:.2f} USD\n\n{consejo}"
+            imagen_url = f"https://trading-bot-x624.onrender.com/static/{nombre}"
+            enviar_whatsapp(para_numero, mensaje, imagen_url)
+
+# ======== NUEVO: Iniciar el scheduler en segundo plano ========
+def iniciar_scheduler():
+    schedule.every(4).hours.do(tarea_periodica)
+    def run_scheduler():
+        while True:
+            schedule.run_pending()
+            time.sleep(60)
+
+    hilo = threading.Thread(target=run_scheduler)
+    hilo.daemon = True
+    hilo.start()
 
 # ======== Webhook principal ========
 @app.route('/webhook', methods=['POST'])
@@ -129,6 +199,7 @@ def webhook():
 
     return str(response)
 
-# ======== Servidor local/render ========
+# ======== Ejecutar servidor y scheduler ========
 if __name__ == '__main__':
+    iniciar_scheduler()  # <<< Inicia tareas cada 4 horas
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 10000)), use_reloader=False)
