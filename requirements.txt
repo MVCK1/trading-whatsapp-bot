@@ -4,3 +4,4 @@ requests
 pandas
 matplotlib
 mplfinance
+schedule
