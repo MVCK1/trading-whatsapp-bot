@@ -17,8 +17,8 @@ from twilio.rest import Client
 app = Flask(__name__, static_folder='static')
 
 # ======== Configuración de colores para velas ========
-COLOR_SUBIDA = 'dark blue'
-COLOR_BAJADA = 'dark red'
+COLOR_SUBIDA = 'blue'
+COLOR_BAJADA = 'red'
 
 market_colors = mpf.make_marketcolors(up=COLOR_SUBIDA, down=COLOR_BAJADA)
 custom_style = mpf.make_mpf_style(
